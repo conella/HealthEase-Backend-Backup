@@ -106,7 +106,6 @@ app.post("/login", async (req, res) => {
   const { username, password } = req.body;
 
   try {
-    // Query user from the database
     const result =
       await sql.query`SELECT * FROM users WHERE username = ${username}`;
 
