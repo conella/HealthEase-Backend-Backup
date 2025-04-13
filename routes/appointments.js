@@ -102,12 +102,13 @@ router.get("/:id", authenticateToken, async (req, res) => {
   }
 });
 
-// Cancel appointment
-router.delete("/:id", authenticateToken, async (req, res) => {
+// Cancel appointment (update status to 'canceled')
+router.put("/:id/cancel", authenticateToken, async (req, res) => {
   const patientId = req.user.id;
   const appointmentId = req.params.id;
 
   try {
+    // Check if the appointment exists for the logged-in patient
     const check = await pool.query(
       `SELECT * FROM appointments WHERE id = $1 AND patientId = $2`,
       [appointmentId, patientId]
@@ -119,7 +120,11 @@ router.delete("/:id", authenticateToken, async (req, res) => {
         .json({ error: "Appointment not found or unauthorized." });
     }
 
-    await pool.query(`DELETE FROM appointments WHERE id = $1`, [appointmentId]);
+    // Update the status to 'canceled' instead of deleting the appointment
+    await pool.query(
+      `UPDATE appointments SET status = 'canceled' WHERE id = $1`,
+      [appointmentId]
+    );
 
     res.status(200).json({ message: "Appointment canceled successfully!" });
   } catch (err) {
@@ -162,12 +167,11 @@ router.put("/:id", authenticateToken, async (req, res) => {
         .json({ error: "Time slot already booked for this doctor." });
     }
 
+    // Combined update in a single query for both time and status change
     await pool.query(
-      `
-      UPDATE appointments
-      SET appointmentDate = $1, appointmentTime = $2::time
-      WHERE id = $3
-    `,
+      `UPDATE appointments
+   SET appointmentDate = $1, appointmentTime = $2::time, status = 'rescheduled'
+   WHERE id = $3`,
       [newAppointmentDate, newAppointmentTime, appointmentId]
     );
 
