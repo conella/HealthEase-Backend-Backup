@@ -6,6 +6,9 @@ const bcrypt = require("bcrypt");
 const sql = require("mssql");
 const jwt = require("jsonwebtoken");
 const cookieParser = require("cookie-parser");
+const departmentsRoutes = require('./routes/departments');
+const doctorsRoutes = require('./routes/doctors');
+const appointmentsRouter = require('./routes/appointments');
 
 const app = express();
 const port = 5000;
@@ -20,6 +23,10 @@ app.use(
 );
 
 app.use(cookieParser());
+
+app.use('/api/departments', departmentsRoutes);
+app.use('/api/doctors', doctorsRoutes);
+app.use("/api/appointments", appointmentsRouter);
 
 const JWT_SECRET = process.env.JWT_SECRET || "supersecret";
 const JWT_REFRESH_SECRET =
