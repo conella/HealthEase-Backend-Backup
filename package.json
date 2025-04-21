@@ -6,6 +6,7 @@
   "scripts": {
     "test": "vitest"
   },
+  "type": "module",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/conella/HealthEase-Backend-Backup.git"
@@ -28,6 +29,10 @@
     "mssql": "^11.0.1"
   },
   "devDependencies": {
+    "@eslint/js": "^9.25.0",
+    "eslint": "^9.25.0",
+    "eslint-plugin-vue": "^10.0.0",
+    "globals": "^16.0.0",
     "supertest": "^7.1.0",
     "vitest": "^3.1.1"
   }

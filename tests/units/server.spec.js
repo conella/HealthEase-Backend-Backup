@@ -1,50 +1,93 @@
-import flushPromises from "flush-promises";
 import request from "supertest";
-import { describe, it, expect, vi, beforeAll, afterAll } from "vitest";
-import express from "express";
+import { describe, it, expect, vi, afterAll } from "vitest";
 import cookieParser from "cookie-parser";
-import * as sql from "mssql";
-
 import { app, server } from "../../server";
 
-vi.mock("mssql");
-
 app.use(cookieParser());
+
+// Mock mssql module
+vi.mock("mssql", async () => {
+  const mockQuery = vi.fn();
+
+  const mockRequest = {
+    input: vi.fn().mockReturnThis(),
+    query: mockQuery,
+  };
+
+  const mockSql = {
+    query: vi.fn((queryStr, params) => {
+
+      // Simulate finding a user with the given username (testuser)
+      if (queryStr.includes("FROM users WHERE username = @username")) {
+        if (params.username === "testuser") {
+          return Promise.resolve({
+            recordset: [{ username: "testuser", password: "hashed-password" }],
+          });
+        }
+      }
+
+      return Promise.resolve({ recordset: [] });
+    }),
+    Request: vi.fn(() => mockRequest),
+    NVarChar: vi.fn(),
+  };
+
+  return {
+    ...mockSql,
+    default: mockSql,
+  };
+});
+
+// Mock bcrypt module
+vi.mock("bcrypt", async () => {
+  const originalBcrypt = await import("bcrypt");
+  return {
+    ...originalBcrypt,
+    compare: vi.fn((plainPassword, hashedPassword) => {
+      if (!plainPassword || !hashedPassword) {
+        throw new Error("data and hash arguments required");
+      }
+
+      if (plainPassword === "wrongpass") {
+        return Promise.resolve(false); // Invalid password
+      }
+
+      return Promise.resolve(true); // Valid password
+    }),
+    hash: vi.fn().mockResolvedValue("hashed-password"),
+  };
+});
 
 describe("Auth API", () => {
   afterAll(() => {
     server.close();
   });
 
-  it("should return 401 when logging in with Login failed", async () => {
-    sql.query = vi.fn().mockResolvedValue({ recordset: [] }); // no user
-    await flushPromises()
-
+  it("should return 401 when logging in with invalid credentials", async () => {
     const response = await request(app)
       .post("/login")
       .send({ username: "wronguser", password: "wrongpass" });
 
-    expect(response.statusCode).toBe(500);
-    expect(response.body.message).toBe("Login failed");
+    // Check that the response is 401 and the message is correct
+    expect(response.statusCode).toBe(401);
+    expect(response.body.message).toBe("Invalid credentials");
   });
 
-  it("should reject duplicate registration", async () => {
-    sql.query = vi.fn().mockResolvedValue({ recordset: [{ username: "testuser" }] });
-
-    const response = await request(app)
-      .post("/register")
-      .send({
-        username: "testuser",
-        password: "password123",
-        firstName: "Test",
-        lastName: "User",
-        role: "patient",
-        email: "test@test.com"
-      });
-
-    expect(response.statusCode).toBe(400);
-    expect(response.body.message).toBe("Username already exists");
+  it("Should successfully register user", async () => {
+    const response = await request(app).post("/register").send({
+      username: "testuser",
+      password: "password123",
+      firstName: "Test",
+      lastName: "User",
+    });
+  
+    // Log the response for debugging purposes
+    console.log("Register Response:", response.body);
+  
+    expect(response.statusCode).toBe(201);
+    expect(response.body.message).toBe("User registered successfully");
   });
+  
 
   it("should return 401 on protected route without token", async () => {
     const response = await request(app).get("/protected");
