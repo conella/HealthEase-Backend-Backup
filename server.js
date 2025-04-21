@@ -181,6 +181,7 @@ app.post("/refresh", (req, res) => {
     });
 
     res.json({ message: "Token refreshed" });
+    // eslint-disable-next-line no-unused-vars
   } catch (err) {
     return res.status(403).json({ message: "Invalid refresh token" });
   }
