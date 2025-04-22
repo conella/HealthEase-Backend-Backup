@@ -4,8 +4,9 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "vitest"
   },
+  "type": "module",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/conella/HealthEase-Backend-Backup.git"
@@ -23,7 +24,16 @@
     "cors": "^2.8.5",
     "dotenv": "^16.5.0",
     "express": "^5.1.0",
+    "flush-promises": "^1.0.2",
     "jsonwebtoken": "^9.0.2",
     "mssql": "^11.0.1"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.25.0",
+    "eslint": "^9.25.0",
+    "eslint-plugin-vue": "^10.0.0",
+    "globals": "^16.0.0",
+    "supertest": "^7.1.0",
+    "vitest": "^3.1.1"
   }
 }
