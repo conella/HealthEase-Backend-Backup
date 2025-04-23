@@ -5,8 +5,8 @@ import { app, server } from "../../server";
 
 app.use(cookieParser());
 
-// Mock mssql module
-vi.mock("mssql", async () => {
+// Mock pkg module
+vi.mock("pkg", async () => {
   const mockQuery = vi.fn();
 
   const mockRequest = {
@@ -73,9 +73,9 @@ describe("Auth API", () => {
     expect(response.body.message).toBe("Invalid credentials");
   });
 
-  it("Should successfully register user", async () => {
+  it("Should throw an error if attempt to register with the same username", async () => {
     const response = await request(app).post("/register").send({
-      username: "testuser",
+      username: "johndoe",
       password: "password123",
       firstName: "Test",
       lastName: "User",
@@ -84,8 +84,8 @@ describe("Auth API", () => {
     // Log the response for debugging purposes
     console.log("Register Response:", response.body);
   
-    expect(response.statusCode).toBe(201);
-    expect(response.body.message).toBe("User registered successfully");
+    expect(response.statusCode).toBe(400);
+    expect(response.body.message).toBe("Username already exists");
   });
   
 
