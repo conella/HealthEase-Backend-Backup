@@ -6,35 +6,37 @@ import { app, server } from "../../server";
 app.use(cookieParser());
 
 // Mock pkg module
-vi.mock("pkg", async () => {
+vi.mock("pg", () => {
   const mockQuery = vi.fn();
 
-  const mockRequest = {
-    input: vi.fn().mockReturnThis(),
+  mockQuery.mockImplementation((sql, values) => {
+    if (sql.includes("SELECT") && values?.[0] === "johndoe") {
+      return Promise.resolve({
+        rows: [{ username: "johndoe" }],
+      });
+    }
+
+    if (sql.includes("SELECT") && values?.includes("wronguser")) {
+      return Promise.resolve({ rows: [] });
+    }
+
+    if (sql.includes("INSERT")) {
+      return Promise.resolve(); // Success
+    }
+
+    return Promise.resolve({ rows: [] });
+  });
+
+  const mockPool = {
     query: mockQuery,
-  };
-
-  const mockSql = {
-    query: vi.fn((queryStr, params) => {
-
-      // Simulate finding a user with the given username (testuser)
-      if (queryStr.includes("FROM users WHERE username = @username")) {
-        if (params.username === "testuser") {
-          return Promise.resolve({
-            recordset: [{ username: "testuser", password: "hashed-password" }],
-          });
-        }
-      }
-
-      return Promise.resolve({ recordset: [] });
-    }),
-    Request: vi.fn(() => mockRequest),
-    NVarChar: vi.fn(),
+    connect: vi.fn().mockResolvedValue({}), // ✅ FIX: simulate real behavior
+    end: vi.fn(),
   };
 
   return {
-    ...mockSql,
-    default: mockSql,
+    default: {
+      Pool: vi.fn(() => mockPool),
+    },
   };
 });
 
@@ -80,14 +82,13 @@ describe("Auth API", () => {
       firstName: "Test",
       lastName: "User",
     });
-  
+
     // Log the response for debugging purposes
     console.log("Register Response:", response.body);
-  
+
     expect(response.statusCode).toBe(400);
     expect(response.body.message).toBe("Username already exists");
   });
-  
 
   it("should return 401 on protected route without token", async () => {
     const response = await request(app).get("/protected");
