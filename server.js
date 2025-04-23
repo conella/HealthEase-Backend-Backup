@@ -1,4 +1,5 @@
 // server.js
+/* eslint-disable no-unused-vars */
 import dotenv from "dotenv";
 dotenv.config();
 import cors from "cors";
@@ -56,9 +57,9 @@ app.use("/api/doctors", doctorsRoutes);
 app.use("/api/appointments", appointmentsRouter);
 
 // JWT config
-const JWT_SECRET = process.env.JWT_SECRET || "supersecret";
-const JWT_REFRESH_SECRET =
-  process.env.JWT_REFRESH_SECRET || "refreshsupersecret";
+
+const JWT_SECRET = process.env.JWT_SECRET;
+const JWT_REFRESH_SECRET = process.env.JWT_REFRESH_SECRET;
 
 // Token functions
 function generateAccessToken(user) {
@@ -178,14 +179,14 @@ app.post("/login", async (req, res) => {
     res.cookie("accessToken", accessToken, {
       httpOnly: true,
       secure: isProductionLike,
-      sameSite: "None",
+      sameSite: isProductionLike ? "None" : "Lax",
       maxAge: 15 * 60 * 1000,
     });
 
     res.cookie("refreshToken", refreshToken, {
       httpOnly: true,
       secure: isProductionLike,
-      sameSite: "None",
+      sameSite: isProductionLike ? "None" : "Lax",
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
@@ -214,7 +215,7 @@ app.post("/refresh", (req, res) => {
     res.cookie("accessToken", newAccessToken, {
       httpOnly: true,
       secure: isProductionLike,
-      sameSite: "None",
+      sameSite: isProductionLike ? "None" : "Lax",
       maxAge: 15 * 60 * 1000,
     });
 
