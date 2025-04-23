@@ -14,9 +14,19 @@ const port = process.env.PORT || 5000;
 
 // Middleware
 app.use(express.json());
+const allowedOrigins = [
+  "http://localhost:5173",
+  "https://staging-healthease.vercel.app",
+];
+
 app.use(
   cors({
-    origin: "http://localhost:5173",
+    origin: function (origin, callback) {
+      if (!origin || allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      }
+      return callback(new Error("Not allowed by CORS"));
+    },
     credentials: true,
   })
 );
