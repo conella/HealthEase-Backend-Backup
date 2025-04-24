@@ -1,13 +1,16 @@
+// server.js
 import dotenv from "dotenv";
+dotenv.config();
 import cors from "cors";
 import express from "express";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import cookieParser from "cookie-parser";
-import pkg from "pg";
+import { Pool } from "pg";
 
-dotenv.config();
-const { Pool } = pkg;
+import departmentsRoutes from "./routes/departments.js";
+import doctorsRoutes from "./routes/doctors.js";
+import appointmentsRouter from "./routes/appointments.js";
 
 const app = express();
 const port = process.env.PORT || 5000;
@@ -15,7 +18,7 @@ const port = process.env.PORT || 5000;
 // Middleware
 app.use(express.json());
 const allowedOrigins = [
-  "http://localhost:5173",
+  "http://localhost:5174",
   "https://staging-healthease.vercel.app",
 ];
 
@@ -32,20 +35,26 @@ app.use(
 );
 app.use(cookieParser());
 
-// JWT secrets
-const JWT_SECRET = process.env.JWT_SECRET || "supersecret";
-const JWT_REFRESH_SECRET = process.env.JWT_REFRESH_SECRET || "refreshsupersecret";
-
-// PostgreSQL config
+// PostgreSQL setup
 const pool = new Pool({
   user: process.env.DB_USER,
   host: process.env.DB_HOST,
   database: process.env.DB_DATABASE,
   password: process.env.DB_PASSWORD,
-  port: process.env.DB_PORT || 32879,
+  port: process.env.DB_PORT,
 });
 
-// Utility: JWT tokens
+// Routes
+app.use("/api/departments", departmentsRoutes);
+app.use("/api/doctors", doctorsRoutes);
+app.use("/api/appointments", appointmentsRouter);
+
+// JWT config
+const JWT_SECRET = process.env.JWT_SECRET || "supersecret";
+const JWT_REFRESH_SECRET =
+  process.env.JWT_REFRESH_SECRET || "refreshsupersecret";
+
+// Token functions
 function generateAccessToken(user) {
   return jwt.sign(user, JWT_SECRET, { expiresIn: "15m" });
 }
@@ -63,12 +72,14 @@ function authenticateToken(req, res, next) {
   });
 }
 
-// Connect and test DB
-pool.connect()
+// DB Connection test
+pool
+  .connect()
   .then(() => console.log("Connected to PostgreSQL DB!"))
   .catch((err) => console.error("Database connection failed:", err));
 
-// Registration route
+// --- AUTH ROUTES ---
+
 app.post("/register", async (req, res) => {
   const {
     username,
@@ -77,28 +88,50 @@ app.post("/register", async (req, res) => {
     lastName,
     role,
     email,
-    phoneNumber
+    departmentId,
+    phoneNumber,
   } = req.body;
 
   const userRole = role || "patient";
 
-  try {
-    const result = await pool.query(
-      "SELECT * FROM users WHERE username = $1",
-      [username]
-    );
+  if (userRole === "doctor" && !departmentId) {
+    return res.status(400).json({
+      message: "Department ID is required when registering a doctor",
+    });
+  }
 
+  try {
+    const result = await pool.query("SELECT * FROM users WHERE username = $1", [
+      username,
+    ]);
     if (result.rows.length > 0) {
       return res.status(400).json({ message: "Username already exists" });
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    await pool.query(
-      `INSERT INTO users (username, password, firstName, lastName, role, email, phoneNumber)
-       VALUES ($1, $2, $3, $4, $5, $6, $7)`,
-      [username, hashedPassword, firstName, lastName, userRole, email, phoneNumber]
-    );
+    const insertUserQuery = `
+      INSERT INTO users (username, password, firstName, lastName, role, email, phoneNumber)
+      VALUES ($1, $2, $3, $4, $5, $6, $7)
+      RETURNING id
+    `;
+    const insertUserResult = await pool.query(insertUserQuery, [
+      username,
+      hashedPassword,
+      firstName,
+      lastName,
+      userRole,
+      email,
+      phoneNumber,
+    ]);
+    const newUserId = insertUserResult.rows[0].id;
+
+    if (userRole === "doctor") {
+      await pool.query(
+        "INSERT INTO doctors (departmentId, userId) VALUES ($1, $2)",
+        [departmentId, newUserId]
+      );
+    }
 
     res.status(201).json({ message: "User registered successfully" });
   } catch (error) {
@@ -107,15 +140,13 @@ app.post("/register", async (req, res) => {
   }
 });
 
-// Login route
 app.post("/login", async (req, res) => {
   const { username, password } = req.body;
 
   try {
-    const result = await pool.query(
-      "SELECT * FROM users WHERE username = $1",
-      [username]
-    );
+    const result = await pool.query("SELECT * FROM users WHERE username = $1", [
+      username,
+    ]);
 
     if (result.rows.length === 0) {
       return res.status(401).json({ message: "Invalid credentials" });
@@ -123,7 +154,6 @@ app.post("/login", async (req, res) => {
 
     const user = result.rows[0];
     const isValidPassword = await bcrypt.compare(password, user.password);
-
     if (!isValidPassword) {
       return res.status(401).json({ message: "Invalid credentials" });
     }
@@ -168,7 +198,8 @@ app.post("/logout", (req, res) => {
 
 app.post("/refresh", (req, res) => {
   const refreshToken = req.cookies.refreshToken;
-  if (!refreshToken) return res.status(401).json({ message: "No refresh token" });
+  if (!refreshToken)
+    return res.status(401).json({ message: "No refresh token" });
 
   try {
     const user = jwt.verify(refreshToken, JWT_REFRESH_SECRET);
