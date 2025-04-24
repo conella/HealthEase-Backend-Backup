@@ -9,7 +9,7 @@ function authenticateToken(req, res, next) {
   const token = req.cookies.accessToken;
   if (!token) return res.status(401).json({ message: "Not authenticated" });
 
-  const secret = process.env.JWT_SECRET || "supersecret";
+  const secret = process.env.JWT_SECRET;
 
   jwt.verify(token, secret, (err, user) => {
     if (err) return res.status(403).json({ message: "Invalid token" });
@@ -110,7 +110,7 @@ router.put("/:id/cancel", authenticateToken, async (req, res) => {
   try {
     // Check if the appointment exists for the logged-in patient
     const check = await pool.query(
-      `SELECT * FROM appointments WHERE id = $1 AND patientId = $2`,
+      "SELECT * FROM appointments WHERE id = $1 AND patientId = $2",
       [appointmentId, patientId]
     );
 
@@ -122,7 +122,7 @@ router.put("/:id/cancel", authenticateToken, async (req, res) => {
 
     // Update the status to 'canceled' instead of deleting the appointment
     await pool.query(
-      `UPDATE appointments SET status = 'canceled' WHERE id = $1`,
+      "UPDATE appointments SET status = 'canceled' WHERE id = $1",
       [appointmentId]
     );
 
@@ -141,7 +141,7 @@ router.put("/:id", authenticateToken, async (req, res) => {
 
   try {
     const existing = await pool.query(
-      `SELECT * FROM appointments WHERE id = $1 AND patientId = $2`,
+      "SELECT * FROM appointments WHERE id = $1 AND patientId = $2",
       [appointmentId, patientId]
     );
 

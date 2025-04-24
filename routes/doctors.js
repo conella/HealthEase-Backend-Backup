@@ -26,7 +26,7 @@ router.get("/", async (req, res) => {
     const result = await pool.query(query, params);
     res.json(
       result.rows.map((row) => ({
-        id: row.doctorid, // 👈 now this matches appointments.doctorId FK
+        id: row.doctorid,
         firstname: row.firstname,
         lastname: row.lastname,
         email: row.email,
