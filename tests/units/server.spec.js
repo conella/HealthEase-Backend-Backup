@@ -3,9 +3,10 @@ import { describe, it, expect, vi, afterAll } from "vitest";
 import cookieParser from "cookie-parser";
 import { app, server } from "../../server";
 
+// Middleware
 app.use(cookieParser());
 
-// Mock pkg module
+// Mock `pg` module
 vi.mock("pg", () => {
   const mockQuery = vi.fn();
 
@@ -21,7 +22,7 @@ vi.mock("pg", () => {
     }
 
     if (sql.includes("INSERT")) {
-      return Promise.resolve(); // Success
+      return Promise.resolve(); // Simulate success
     }
 
     return Promise.resolve({ rows: [] });
@@ -29,18 +30,17 @@ vi.mock("pg", () => {
 
   const mockPool = {
     query: mockQuery,
-    connect: vi.fn().mockResolvedValue({}), // ✅ FIX: simulate real behavior
+    connect: vi.fn().mockResolvedValue({}), // Mock `connect` to return an empty object
     end: vi.fn(),
   };
 
   return {
-    default: {
-      Pool: vi.fn(() => mockPool),
-    },
+    // Mock Pool constructor as a function that returns mockPool
+    Pool: vi.fn(() => mockPool),
   };
 });
 
-// Mock bcrypt module
+// Mock `bcrypt` module
 vi.mock("bcrypt", async () => {
   const originalBcrypt = await import("bcrypt");
   return {
@@ -56,13 +56,13 @@ vi.mock("bcrypt", async () => {
 
       return Promise.resolve(true); // Valid password
     }),
-    hash: vi.fn().mockResolvedValue("hashed-password"),
+    hash: vi.fn().mockResolvedValue("hashed-password"), // Mock password hashing
   };
 });
 
 describe("Auth API", () => {
   afterAll(() => {
-    server.close();
+    server.close(); // Close server after tests
   });
 
   it("should return 401 when logging in with invalid credentials", async () => {
@@ -70,12 +70,11 @@ describe("Auth API", () => {
       .post("/login")
       .send({ username: "wronguser", password: "wrongpass" });
 
-    // Check that the response is 401 and the message is correct
     expect(response.statusCode).toBe(401);
     expect(response.body.message).toBe("Invalid credentials");
   });
 
-  it("Should throw an error if attempt to register with the same username", async () => {
+  it("should throw an error if attempt to register with the same username", async () => {
     const response = await request(app).post("/register").send({
       username: "johndoe",
       password: "password123",
@@ -83,7 +82,6 @@ describe("Auth API", () => {
       lastName: "User",
     });
 
-    // Log the response for debugging purposes
     console.log("Register Response:", response.body);
 
     expect(response.statusCode).toBe(400);
