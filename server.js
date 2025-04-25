@@ -12,6 +12,7 @@ import { Pool } from "pg";
 import departmentsRoutes from "./routes/departments.js";
 import doctorsRoutes from "./routes/doctors.js";
 import appointmentsRouter from "./routes/appointments.js";
+import checkappointments from "./routes/checkappointments.js";
 
 const app = express();
 const port = process.env.PORT || 5000;
@@ -55,6 +56,7 @@ const pool = new Pool({
 app.use("/api/departments", departmentsRoutes);
 app.use("/api/doctors", doctorsRoutes);
 app.use("/api/appointments", appointmentsRouter);
+app.use("/api/checkappointments", checkappointments);
 
 // JWT config
 
