@@ -17,10 +17,13 @@ const port = process.env.PORT || 5000;
 const env = process.env.NODE_ENV;
 const isProductionLike = env === "production" || env === "staging";
 
+console.log(`Running in ${env} mode`);
+console.log(`isProductionLike: ${isProductionLike}`);
+
 // Middleware
 app.use(express.json());
 const allowedOrigins = [
-  "http://localhost:5174",
+  "http://localhost:5173",
   "https://staging-healthease.vercel.app",
   "https://healthease-frontend.vercel.app"
 ];
@@ -175,14 +178,14 @@ app.post("/login", async (req, res) => {
     res.cookie("accessToken", accessToken, {
       httpOnly: true,
       secure: isProductionLike,
-      sameSite: "lax",
+      SameSite: "none",
       maxAge: 15 * 60 * 1000,
     });
 
     res.cookie("refreshToken", refreshToken, {
       httpOnly: true,
       secure: isProductionLike,
-      sameSite: "lax",
+      SameSite: "none",
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
@@ -211,7 +214,7 @@ app.post("/refresh", (req, res) => {
     res.cookie("accessToken", newAccessToken, {
       httpOnly: true,
       secure: isProductionLike,
-      sameSite: "lax",
+      SameSite: "none",
       maxAge: 15 * 60 * 1000,
     });
 
