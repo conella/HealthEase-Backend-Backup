@@ -13,6 +13,12 @@ import departmentsRoutes from "./routes/departments.js";
 import doctorsRoutes from "./routes/doctors.js";
 import appointmentsRouter from "./routes/appointments.js";
 import checkappointments from "./routes/checkappointments.js";
+import doctorleaves from "./routes/doctorleaves.js";
+import checkdoctorleaves from "./routes/checkdoctorleave.js";
+import showleavedays from "./routes/showleavedays.js";
+import updatenotes from "./routes/updatenotes.js";
+import doctoravailability from "./routes/doctorAvailability.js";
+
 
 const app = express();
 const port = process.env.PORT || 5000;
@@ -57,6 +63,11 @@ app.use("/api/departments", departmentsRoutes);
 app.use("/api/doctors", doctorsRoutes);
 app.use("/api/appointments", appointmentsRouter);
 app.use("/api/checkappointments", checkappointments);
+app.use("/api/doctorleaves", doctorleaves);
+app.use("/api/checkdoctorleaves", checkdoctorleaves);
+app.use("/api/showleavedays", showleavedays);
+app.use("/api/updatenotes", updatenotes);
+app.use("/api/doctoravailability", doctoravailability);
 
 // JWT config
 
