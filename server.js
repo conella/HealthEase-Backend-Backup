@@ -178,14 +178,14 @@ app.post("/login", async (req, res) => {
     res.cookie("accessToken", accessToken, {
       httpOnly: true,
       secure: isProductionLike,
-      SameSite: "none",
+      SameSite: "None",
       maxAge: 15 * 60 * 1000,
     });
 
     res.cookie("refreshToken", refreshToken, {
       httpOnly: true,
       secure: isProductionLike,
-      SameSite: "none",
+      SameSite: "None",
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
@@ -214,7 +214,7 @@ app.post("/refresh", (req, res) => {
     res.cookie("accessToken", newAccessToken, {
       httpOnly: true,
       secure: isProductionLike,
-      SameSite: "none",
+      SameSite: "None",
       maxAge: 15 * 60 * 1000,
     });
 
