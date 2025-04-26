@@ -24,7 +24,7 @@ console.log(`isProductionLike: ${isProductionLike}`);
 // Middleware
 app.use(express.json());
 const allowedOrigins = [
-  "http://localhost:5174",
+  "http://localhost:5173",
   "https://staging-healthease.vercel.app",
   "https://healthease-frontend.vercel.app"
 ];
