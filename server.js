@@ -57,9 +57,13 @@ app.use("/api/doctors", doctorsRoutes);
 app.use("/api/appointments", appointmentsRouter);
 
 // JWT config
-const JWT_SECRET = process.env.JWT_SECRET || "supersecret";
-const JWT_REFRESH_SECRET =
-  process.env.JWT_REFRESH_SECRET || "refreshsupersecret";
+
+if (!process.env.JWT_SECRET || !process.env.JWT_REFRESH_SECRET) {
+  throw new Error("Missing JWT secrets in environment variables");
+}
+
+const JWT_SECRET = process.env.JWT_SECRET;
+const JWT_REFRESH_SECRET = process.env.JWT_REFRESH_SECRET;
 
 // Token functions
 function generateAccessToken(user) {
