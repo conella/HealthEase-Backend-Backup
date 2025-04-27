@@ -128,7 +128,7 @@ describe("Auth API", () => {
         firstName: "Mary",
         lastName: "Campbell",
       },
-      process.env.JWT_SECRET || "supersecret"
+      "supersecret"
     );
 
     const response = await request(app)
@@ -143,7 +143,7 @@ describe("Auth API", () => {
   it("should refresh token when refresh token is valid", async () => {
     const refreshToken = jwt.sign(
       { id: 1, username: "Mary" },
-      process.env.JWT_REFRESH_SECRET || "refreshsupersecret"
+      "refreshsupersecret"
     );
 
     const response = await request(app)
