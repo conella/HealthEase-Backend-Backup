@@ -17,6 +17,7 @@ export default defineConfig([
     extends: ["js/recommended", pluginVue.configs["flat/essential"]],
     rules: {
       "no-unused-vars": "warn",
+      "quotes": ["error", "double"],
     },
   },
 ]);

@@ -1,4 +1,5 @@
 // server.js
+/* eslint-disable no-unused-vars */
 import dotenv from "dotenv";
 dotenv.config();
 import cors from "cors";
