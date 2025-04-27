@@ -19,8 +19,9 @@ jobs:
         run: npm ci
 
       - name: Set environment variables
-        run: echo "JWT_SECRET=supersecret" >> $GITHUB_ENV
-        run: echo "JWT_REFRESH_SECRET=refreshsupersecret" >> $GITHUB_ENV
+        run: |
+          echo "JWT_SECRET=supersecret" >> $GITHUB_ENV
+          echo "JWT_REFRESH_SECRET=refreshsupersecret" >> $GITHUB_ENV
 
       - name: Run tests with Vitest
         run: npm run test -- --run
