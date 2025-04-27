@@ -1,8 +1,15 @@
 import request from "supertest";
-import { describe, it, expect, vi, afterAll } from "vitest";
+import { describe, it, expect, vi, afterAll, beforeAll } from "vitest";
 import cookieParser from "cookie-parser";
 import { app, server } from "../../server";
 import jwt from "jsonwebtoken";
+
+// Mock environment variables for testing
+beforeAll(() => {
+  // Mocking environment variables
+  process.env.JWT_SECRET = "supersecret";
+  process.env.JWT_REFRESH_SECRET = "refreshsupersecret";
+});
 
 // Mocking the pg module (PostgreSQL) to simulate database interactions
 vi.mock("pg", () => {
@@ -53,7 +60,6 @@ vi.mock("bcrypt", async () => {
   return {
     ...originalBcrypt,
     compare: vi.fn((plainPassword, hashedPassword) => {
-      // Simulate password comparison logic: check if plainPassword matches the hashed password
       if (
         plainPassword === "password123" &&
         hashedPassword === "hashed-password"
@@ -128,7 +134,7 @@ describe("Auth API", () => {
         firstName: "Mary",
         lastName: "Campbell",
       },
-      "supersecret"
+      process.env.JWT_SECRET || "supersecret"
     );
 
     const response = await request(app)
@@ -143,7 +149,7 @@ describe("Auth API", () => {
   it("should refresh token when refresh token is valid", async () => {
     const refreshToken = jwt.sign(
       { id: 1, username: "Mary" },
-      "refreshsupersecret"
+      process.env.JWT_REFRESH_SECRET || "refreshsupersecret"
     );
 
     const response = await request(app)
