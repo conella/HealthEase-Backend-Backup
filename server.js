@@ -58,10 +58,6 @@ app.use("/api/appointments", appointmentsRouter);
 
 // JWT config
 
-if (!process.env.JWT_SECRET || !process.env.JWT_REFRESH_SECRET) {
-  throw new Error("Missing JWT secrets in environment variables");
-}
-
 const JWT_SECRET = process.env.JWT_SECRET;
 const JWT_REFRESH_SECRET = process.env.JWT_REFRESH_SECRET;
 
