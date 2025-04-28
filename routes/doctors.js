@@ -48,7 +48,8 @@ router.get("/find-doctors", async (req, res) => {
         u.firstname || ' ' || u.lastname AS doctorName,
         u.email,
         u.phonenumber,
-        d.name AS department
+        d.name AS department,
+        doc.id AS doctorId
       FROM 
         doctors doc
       JOIN 
