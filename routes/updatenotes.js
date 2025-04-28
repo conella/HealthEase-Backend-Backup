@@ -14,7 +14,7 @@ router.put("/addnotes/:appointmentId", async (req, res) => {
 
   try {
     const result = await pool.query(
-      `UPDATE appointments SET notes = $1 WHERE id = $2`,
+      "UPDATE appointments SET notes = $1 WHERE id = $2",
       [notes, appointmentId]
     );
 

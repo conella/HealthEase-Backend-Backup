@@ -8,7 +8,7 @@ router.get("/getleaves/:doctorId", async (req, res) => {
   
     try {
       const result = await pool.query(
-        `SELECT leavedate FROM doctorleaves WHERE doctorid = $1`,
+        "SELECT leavedate FROM doctorleaves WHERE doctorid = $1",
         [doctorId]
       );
       res.status(200).json(result.rows);

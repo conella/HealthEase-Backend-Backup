@@ -12,7 +12,7 @@ router.post("/addleave", async (req, res) => {
   
     try {
       await pool.query(
-        `INSERT INTO doctorleaves (doctorid, leavedate, reason) VALUES ($1, $2, $3)`,
+        "INSERT INTO doctorleaves (doctorid, leavedate, reason) VALUES ($1, $2, $3)",
         [doctorId, leaveDate, reason || null]
       );
       res.status(201).json({ message: "Leave applied successfully" });

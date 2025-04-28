@@ -53,7 +53,7 @@ describe("Appointment Notes API", () => {
     expect(res.statusCode).toBe(200);
     expect(res.body).toEqual({ message: "Notes updated successfully" });
     expect(mockQuery).toHaveBeenCalledWith(
-      `UPDATE appointments SET notes = $1 WHERE id = $2`,
+      "UPDATE appointments SET notes = $1 WHERE id = $2",
       [notes, appointmentId]
     );
   });
@@ -62,7 +62,7 @@ describe("Appointment Notes API", () => {
     mockQuery.mockResolvedValueOnce({ rowCount: 0 });
 
     const res = await request(app)
-      .put(`/api/updatenotes/addnotes/9999`)
+      .put("/api/updatenotes/addnotes/9999")
       .send({ notes: "Test" });
 
     expect(res.statusCode).toBe(404);
@@ -70,7 +70,7 @@ describe("Appointment Notes API", () => {
   });
 
   it("should return 400 if notes or appointmentId are missing", async () => {
-    const res = await request(app).put(`/api/updatenotes/addnotes/`).send({});
+    const res = await request(app).put("/api/updatenotes/addnotes/").send({});
 
     expect(res.statusCode).toBe(404); // Invalid route without appointmentId
   });

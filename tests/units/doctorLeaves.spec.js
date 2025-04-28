@@ -57,7 +57,7 @@ describe("Doctor Leaves API", () => {
       { leavedate: "2025-05-15" },
     ]);
     expect(mockQuery).toHaveBeenCalledWith(
-      `SELECT leavedate FROM doctorleaves WHERE doctorid = $1`,
+      "SELECT leavedate FROM doctorleaves WHERE doctorid = $1",
       [doctorId]
     );
   });

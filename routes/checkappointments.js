@@ -26,11 +26,11 @@ router.get("/:id", async (req, res) => {
 
     // If startDate and endDate are provided, add to query
     if (startDate && endDate) {
-      query += ` AND a.appointmentdate BETWEEN $2 AND $3`;
+      query += " AND a.appointmentdate BETWEEN $2 AND $3";
       params.push(startDate, endDate);
     }
 
-    query += ` ORDER BY a.appointmentdate, a.appointmenttime`;
+    query += " ORDER BY a.appointmentdate, a.appointmenttime";
 
     const result = await pool.query(query, params);
 

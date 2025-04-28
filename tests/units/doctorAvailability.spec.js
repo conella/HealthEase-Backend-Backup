@@ -49,7 +49,7 @@ describe("Doctor Availability API", () => {
     expect(res.statusCode).toBe(200);
     expect(res.body).toHaveLength(2);
     expect(mockQuery).toHaveBeenCalledWith(
-      `SELECT id, dayofweek, starttime, endtime FROM doctoravailability WHERE doctorid = $1 ORDER BY dayofweek`,
+      "SELECT id, dayofweek, starttime, endtime FROM doctoravailability WHERE doctorid = $1 ORDER BY dayofweek",
       [doctorId]
     );
   });
@@ -119,7 +119,7 @@ describe("Doctor Availability API", () => {
   it("should return 404 when updating non-existent availability", async () => {
     mockQuery.mockResolvedValueOnce({ rows: [] });
 
-    const res = await request(app).put(`/api/availability/availability/9999`).send({
+    const res = await request(app).put("/api/availability/availability/9999").send({
       day: "Thursday",
       startTime: "08:00",
       endTime: "10:00",
@@ -140,7 +140,7 @@ describe("Doctor Availability API", () => {
     expect(res.statusCode).toBe(200);
     expect(res.body).toEqual({ message: "Doctor availability deleted successfully" });
     expect(mockQuery).toHaveBeenCalledWith(
-      `DELETE FROM doctoravailability WHERE id = $1 RETURNING *`,
+      "DELETE FROM doctoravailability WHERE id = $1 RETURNING *",
       [availabilityId]
     );
   });
@@ -148,7 +148,7 @@ describe("Doctor Availability API", () => {
   it("should return 404 if availability entry not found for deletion", async () => {
     mockQuery.mockResolvedValueOnce({ rows: [] });
 
-    const res = await request(app).delete(`/api/availability/availability/9999`);
+    const res = await request(app).delete("/api/availability/availability/9999");
 
     expect(res.statusCode).toBe(404);
     expect(res.body).toEqual({ error: "Availability not found" });

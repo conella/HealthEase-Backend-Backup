@@ -13,7 +13,7 @@ router.post("/checkleave", async (req, res) => {
 
   try {
     const result = await pool.query(
-      `SELECT * FROM doctorleaves WHERE doctorid = $1 AND leavedate = $2`,
+      "SELECT * FROM doctorleaves WHERE doctorid = $1 AND leavedate = $2",
       [doctorId, selectedDate]
     );
 

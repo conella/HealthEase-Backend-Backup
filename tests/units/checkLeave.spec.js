@@ -49,7 +49,7 @@ describe("POST /api/checkdoctorleaves/checkleave", () => {
     });
 
     expect(mockQuery).toHaveBeenCalledWith(
-      `SELECT * FROM doctorleaves WHERE doctorid = $1 AND leavedate = $2`,
+      "SELECT * FROM doctorleaves WHERE doctorid = $1 AND leavedate = $2",
       [2, "2025-05-01"]
     );
   });

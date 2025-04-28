@@ -8,7 +8,7 @@ router.get("/availability/:doctorId", async (req, res) => {
   const { doctorId } = req.params;
   try {
     const result = await pool.query(
-      `SELECT id, dayofweek, starttime, endtime FROM doctoravailability WHERE doctorid = $1 ORDER BY dayofweek`,
+      "SELECT id, dayofweek, starttime, endtime FROM doctoravailability WHERE doctorid = $1 ORDER BY dayofweek",
       [doctorId]
     );
     res.status(200).json(result.rows);
@@ -62,7 +62,7 @@ router.delete("/availability/:id", async (req, res) => {
   const { id } = req.params;
   try {
     const result = await pool.query(
-      `DELETE FROM doctoravailability WHERE id = $1 RETURNING *`,
+      "DELETE FROM doctoravailability WHERE id = $1 RETURNING *",
       [id]
     );
     if (result.rows.length === 0) {
